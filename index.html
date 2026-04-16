@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#2563eb"/>
+  <meta name="description" content="SIWES Logbook - Daily work diary for IT students"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <title>SIWES Logbook</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #2563eb;
+      --blue-dark:  #1d4ed8;
+      --blue-light: #eff6ff;
+      --green:      #16a34a;
+      --green-light:#dcfce7;
+      --red:        #dc2626;
+      --red-light:  #fee2e2;
+      --orange:     #d97706;
+      --yellow-light:#fef3c7;
+      --gray-50:    #f8fafc;
+      --gray-100:   #f1f5f9;
+      --gray-200:   #e2e8f0;
+      --gray-400:   #94a3b8;
+      --gray-600:   #475569;
+      --gray-800:   #1e293b;
+      --white:      #ffffff;
+      --radius:     12px;
+      --shadow:     0 2px 12px rgba(0,0,0,0.08);
+      --shadow-sm:  0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      min-height: 100vh;
+      padding-bottom: 90px; /* space for bottom nav */
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--blue);
+      color: var(--white);
+      padding: 18px 20px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    }
+
+    .header-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header p  { font-size: 0.78rem; opacity: 0.85; margin-top: 2px; }
+
+    .install-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: none;
+      font-weight: 600;
+    }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 4px 12px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--gray-400);
+      font-size: 0.7rem;
+      font-weight: 600;
+      transition: color 0.2s;
+      gap: 4px;
+    }
+
+    .nav-item .nav-icon { font-size: 1.4rem; }
+    .nav-item.active { color: var(--blue); }
+
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Container ── */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+
+    .card-sub {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      margin-bottom: 14px;
+    }
+
+    /* ── Progress Bar ── */
+    .progress-wrap {
+      background: var(--gray-100);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--blue), #60a5fa);
+      transition: width 0.6s ease;
+    }
+
+    .progress-bar.danger { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .progress-bar.warn   { background: linear-gradient(90deg, #d97706, #fbbf24); }
+    .progress-bar.good   { background: linear-gradient(90deg, var(--green), #4ade80); }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--blue);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--gray-600);
+      margin-top: 4px;
+    }
+
+    /* ── Streak ── */
+    .streak-banner {
+      background: linear-gradient(135deg, var(--yellow-light), #fde68a);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .streak-emoji { font-size: 2rem; }
+    .streak-text strong { font-size: 1rem; color: #92400e; display: block; }
+    .streak-text span   { font-size: 0.78rem; color: #78350f; }
+
+    /* ── Inputs ── */
+    textarea, input[type="text"], input[type="date"],
+    input[type="time"], input[type="number"], select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      transition: border 0.2s;
+      background: var(--white);
+      color: var(--gray-800);
+    }
+
+    textarea:focus, input:focus, select:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
+    textarea {
+      height: 140px;
+      resize: vertical;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .input-row label {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--gray-400);
+      margin-top: 4px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: var(--blue-dark); }
+
+    .btn-green { background: var(--green-light); color: var(--green); }
+    .btn-green:hover { background: #bbf7d0; }
+
+    .btn-red { background: var(--red-light); color: var(--red); }
+    .btn-red:hover { background: #fecaca; }
+
+    .btn-ghost {
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+
+    .btn-full { width: 100%; justify-content: center; }
+
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+    /* ── Entries ── */
+    .entry-item {
+      background: var(--white);
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .entry-item.missed {
+      border-left-color: var(--red);
+      background: #fff8f8;
+    }
+
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .entry-date-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .entry-text {
+      font-size: 0.88rem;
+      color: var(--gray-600);
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .badge-blue   { background: var(--blue-light); color: var(--blue); }
+    .badge-red    { background: var(--red-light); color: var(--red); }
+    .badge-green  { background: var(--green-light); color: var(--green); }
+    .badge-orange { background: var(--yellow-light); color: var(--orange); }
+
+    /* ── Weekly Grid ── */
+    .week-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .week-nav span {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--gray-800);
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .day-cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s;
+      border: 2px solid transparent;
+    }
+
+    .day-cell:hover { transform: scale(1.08); }
+
+    .day-cell .day-name { font-size: 0.6rem; opacity: 0.7; margin-bottom: 2px; }
+    .day-cell .day-num  { font-size: 0.85rem; font-weight: 800; }
+
+    .day-cell.logged   { background: var(--green-light); color: var(--green); border-color: #86efac; }
+    .day-cell.missed   { background: var(--red-light); color: var(--red); border-color: #fca5a5; }
+    .day-cell.future   { background: var(--gray-100); color: var(--gray-400); }
+    .day-cell.today    { border-color: var(--blue); }
+    .day-cell.weekend  { opacity: 0.5; }
+    .day-cell.selected { box-shadow: 0 0 0 3px rgba(37,99,235,0.4); }
+
+    /* ── Weekly Summary Card ── */
+    .week-summary {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .week-stat {
+      flex: 1;
+      min-width: 80px;
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .week-stat strong { display: block; font-size: 1.3rem; color: var(--blue); }
+    .week-stat span   { font-size: 0.7rem; color: var(--gray-600); }
+
+    /* ── Timeline ── */
+    .timeline-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 0.85rem;
+    }
+
+    .timeline-row:last-child { border: none; }
+    .timeline-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-gray   { background: var(--gray-400); }
+    .dot-blue   { background: var(--blue); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--gray-800);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Empty State ── */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray-400);
+    }
+
+    .empty .empty-icon { font-size: 3rem; margin-bottom: 10px; }
+    .empty p { font-size: 0.88rem; }
+
+    /* ── Section Title ── */
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--gray-600);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ── Completion Card ── */
+    .completion-card {
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .completion-card.on-track  { background: var(--green-light); border: 1px solid #86efac; }
+    .completion-card.at-risk   { background: var(--yellow-light); border: 1px solid #fcd34d; }
+    .completion-card.behind    { background: var(--red-light); border: 1px solid #fca5a5; }
+    .completion-card.completed { background: #ede9fe; border: 1px solid #c4b5fd; }
+
+    .completion-card h3 { font-size: 1rem; margin-bottom: 6px; }
+    .completion-card p  { font-size: 0.83rem; line-height: 1.5; }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--gray-200);
+      margin: 16px 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 400px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .day-cell .day-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>📓 SIWES Logbook</h1>
+      <p id="headerSub">Daily Work Diary</p>
+    </div>
+    <button class="install-btn" id="installBtn">⬇️ Install App</button>
+  </div>
+</header>
+
+<!-- Pages -->
+<!-- ═══════════ HOME PAGE ═══════════ -->
+<div class="page active" id="page-home">
+  <div class="container">
+
+    <!-- Streak -->
+    <div class="streak-banner" id="streakBanner">
+      <div class="streak-emoji">🔥</div>
+      <div class="streak-text">
+        <strong id="streakCount">0 day streak</strong>
+        <span>Keep logging daily!</span>
+      </div>
+    </div>
+
+    <!-- Progress Overview -->
+    <div class="card" id="progressCard">
+      <div class="card-title">📊 SIWES Progress</div>
+      <div class="card-sub" id="progressSub">Set your start date in Settings to track progress</div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="mainProgressBar" style="width:0%"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--gray-400); margin-top:4px;">
+        <span id="progressLeft">Week 0</span>
+        <span id="progressPercent">0%</span>
+        <span>Week 24</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-box">
+        <div class="stat-number" id="statDaysLogged">0</div>
+        <div class="stat-label">Days Logged</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="statWeeksLeft">—</div>
+        <div class="stat-label">Weeks Left</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="statMissed">0</div>
+        <div class="stat-label">Days Missed</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="statCompletion">—</div>
+        <div class="stat-label">Est. End Date</div>
+      </div>
+    </div>
+
+    <!-- Today's Entry -->
+    <div class="card">
+      <div class="card-title">✍️ Today's Entry</div>
+      <div class="card-sub" id="todayDateLabel">—</div>
+      <textarea
+        id="entryText"
+        placeholder="What did you do at work today?&#10;&#10;e.g. Attended sprint planning meeting, worked on the user authentication module, fixed 2 bugs in the dashboard, reviewed colleague's pull request..."
+      ></textarea>
+      <div class="char-count"><span id="charCount">0</span> characters</div>
+      <button class="btn btn-primary btn-full" style="margin-top:12px" onclick="saveEntry()">
+        💾 Save Entry
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ WEEKLY PAGE ═══════════ -->
+<div class="page" id="page-weekly">
+  <div class="container">
+
+    <div class="card">
+      <div class="week-nav">
+        <button class="btn btn-ghost btn-sm" onclick="changeWeek(-1)">← Prev</button>
+        <span id="weekLabel">Week —</span>
+        <button class="btn btn-ghost btn-sm" onclick="changeWeek(1)">Next →</button>
+      </div>
+
+      <!-- 7-day grid -->
+      <div class="week-grid" id="weekGrid"></div>
+
+      <!-- Week summary stats -->
+      <div class="week-summary" id="weekSummary"></div>
+    </div>
+
+    <!-- Selected day detail -->
+    <div class="card" id="dayDetailCard" style="display:none">
+      <div class="card-title" id="dayDetailTitle">—</div>
+      <div class="divider"></div>
+      <div id="dayDetailContent"></div>
+    </div>
+
+    <!-- All entries this week -->
+    <div class="section-title">
+      Entries this week
+      <span id="weekEntriesCount" class="badge badge-blue">0</span>
+    </div>
+    <div id="weekEntriesList"></div>
+
+  </div>
+</div>
+
+<!-- ═══════════ HISTORY PAGE ═══════════ -->
+<div class="page" id="page-history">
+  <div class="container">
+
+    <!-- Filter -->
+    <div class="card" style="padding:14px">
+      <div class="input-row">
+        <label>Filter:</label>
+        <select id="historyFilter" onchange="renderHistory()" style="flex:1">
+          <option value="all">All Entries</option>
+          <option value="logged">Logged Days</option>
+          <option value="missed">Missed Days</option>
+        </select>
+        <select id="historySort" onchange="renderHistory()" style="flex:1">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="historyList"></div>
+
+  </div>
+</div>
+
+<!-- ═══════════ SETTINGS PAGE ═══════════ -->
+<div class="page" id="page-settings">
+  <div class="container">
+
+    <!-- SIWES Duration -->
+    <div class="card">
+      <div class="card-title">📅 SIWES Duration</div>
+      <div class="card-sub">Set your IT start date to track the 24-week program</div>
+
+      <div class="input-group">
+        <label>Start Date</label>
+        <input type="date" id="startDate" onchange="saveSettings()"/>
+      </div>
+
+      <div class="input-group">
+        <label>Duration (weeks)</label>
+        <input type="number" id="durationWeeks" value="24" min="1" max="52" onchange="saveSettings()"/>
+      </div>
+
+      <div class="input-group">
+        <label>Work Days</label>
+        <select id="workDays" onchange="saveSettings()">
+          <option value="mon-fri">Monday – Friday</option>
+          <option value="mon-sat">Monday – Saturday</option>
+        </select>
+      </div>
+
+      <!-- Completion Projection -->
+      <div class="completion-card on-track" id="completionCard" style="display:none">
+        <h3 id="completionTitle">On Track ✅</h3>
+        <p id="completionBody">—</p>
+      </div>
+
+      <div id="completionTimeline"></div>
+    </div>
+
+    <!-- Reminder -->
+    <div class="card">
+      <div class="card-title">⏰ Daily Reminder</div>
+      <div class="card-sub">Get notified to fill your logbook</div>
+
+      <div class="input-group">
+        <label>Reminder Time</label>
+        <input type="time" id="reminderTime" value="17:00"/>
+      </div>
+
+      <button class="btn btn-green btn-full" onclick="setReminder()">
+        🔔 Enable Reminder
+      </button>
+      <p id="reminderStatus" style="font-size:0.8rem; color:var(--gray-400); margin-top:10px; text-align:center;"></p>
+    </div>
+
+    <!-- Profile -->
+    <div class="card">
+      <div class="card-title">👤 Profile</div>
+      <div class="card-sub">Optional — shown on exports</div>
+
+      <div class="input-group">
+        <label>Your Name</label>
+        <input type="text" id="profileName" placeholder="e.g. Chukwuemeka Obi" onchange="saveSettings()"/>
+      </div>
+
+      <div class="input-group">
+        <label>Institution</label>
+        <input type="text" id="profileSchool" placeholder="e.g. University of Lagos" onchange="saveSettings()"/>
+      </div>
+
+      <div class="input-group">
+        <label>Place of IT</label>
+        <input type="text" id="profileCompany" placeholder="e.g. Flutterwave, Lagos" onchange="saveSettings()"/>
+      </div>
+
+      <div class="input-group">
+        <label>Department / Course</label>
+        <input type="text" id="profileCourse" placeholder="e.g. Computer Science" onchange="saveSettings()"/>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="card">
+      <div class="card-title">📤 Export Logbook</div>
+      <div class="card-sub">Download your entries as a text file</div>
+      <button class="btn btn-primary btn-full" onclick="exportLogbook()">
+        ⬇️ Export as Text File
+      </button>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card" style="border: 1px solid var(--red-light)">
+      <div class="card-title" style="color:var(--red)">⚠️ Danger Zone</div>
+      <div class="card-sub">This cannot be undone</div>
+      <button class="btn btn-red btn-full" onclick="clearAllData()">
+        🗑️ Clear All Data
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="navigate('home')" id="nav-home">
+    <span class="nav-icon">🏠</span>Home
+  </button>
+  <button class="nav-item" onclick="navigate('weekly')" id="nav-weekly">
+    <span class="nav-icon">📆</span>Weekly
+  </button>
+  <button class="nav-item" onclick="navigate('history')" id="nav-history">
+    <span class="nav-icon">📋</span>History
+  </button>
+  <button class="nav-item" onclick="navigate('settings')" id="nav-settings">
+    <span class="nav-icon">⚙️</span>Settings
+  </button>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── Constants ─────────────────────────────────────────────
+const STORAGE_KEYS = {
+  entries:  'siwes_entries',
+  settings: 'siwes_settings',
+  reminder: 'siwes_reminder',
+};
+
+const DAY_NAMES  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun',
+                     'Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ── State ─────────────────────────────────────────────────
+let currentWeekOffset = 0;  // 0 = current week
+let selectedDay       = null;
+let deferredInstall   = null;
+let reminderInterval  = null;
+
+// ── Storage Helpers ───────────────────────────────────────
+function getEntries() {
+  return JSON.parse(localStorage.getItem(STORAGE_KEYS.entries) || '{}');
+}
+function saveEntries(e) {
+  localStorage.setItem(STORAGE_KEYS.entries, JSON.stringify(e));
+}
+function getSettings() {
+  const defaults = {
+    startDate:     '',
+    durationWeeks: 24,
+    workDays:      'mon-fri',
+    name:          '',
+    school:        '',
+    company:       '',
+    course:        '',
+    reminderTime:  '17:00',
+  };
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || '{}');
+  return { ...defaults, ...saved };
+}
+function saveSettingsObj(s) {
+  localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(s));
+}
+
+// ── Date Helpers ──────────────────────────────────────────
+function todayStr() {
+  return localDateStr(new Date());
+}
+
+// returns "YYYY-MM-DD" in local time (avoids UTC shift bugs)
+function localDateStr(d) {
+  const y  = d.getFullYear();
+  const m  = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+function parseLocalDate(str) {
+  // "YYYY-MM-DD" → Date at midnight local
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function formatFull(dateStr) {
+  const d = parseLocalDate(dateStr);
+  return d.toLocaleDateString('en-NG', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+}
+
+function formatShort(dateStr) {
+  const d = parseLocalDate(dateStr);
+  return `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+}
+
+function addDays(dateStr, n) {
+  const d = parseLocalDate(dateStr);
+  d.setDate(d.getDate() + n);
+  return localDateStr(d);
+}
+
+function diffDays(a, b) {
+  // days from date string a to b
+  return Math.round(
+    (parseLocalDate(b) - parseLocalDate(a)) / 86400000
+  );
+}
+
+function weekStart(offset = 0) {
+  // Monday of week (offset weeks from current)
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const diff = (day === 0 ? -6 : 1 - day); // shift to Monday
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diff + offset * 7);
+  return localDateStr(mon);
+}
+
+function isWorkday(dateStr, workDays) {
+  const d   = parseLocalDate(dateStr);
+  const dow = d.getDay(); // 0=Sun,6=Sat
+  if (workDays === 'mon-sat') return dow >= 1 && dow <= 6;
+  return dow >= 1 && dow <= 5; // mon-fri default
+}
+
+// ── Navigation ────────────────────────────────────────────
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.getElementById(`nav-${page}`).classList.add('active');
+
+  if (page === 'weekly')  renderWeekly();
+  if (page === 'history') renderHistory();
+  if (page === 'settings') renderCompletionInfo();
+}
+
+// ── Toast ─────────────────────────────────────────────────
+function showToast(msg, ms = 3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), ms);
+}
+
+// ── Char Count ────────────────────────────────────────────
+document.getElementById('entryText')
+  .addEventListener('input', () => {
+    document.getElementById('charCount').textContent =
+      document.getElementById('entryText').value.length;
+  });
+
+// ── Save Entry ────────────────────────────────────────────
+function saveEntry() {
+  const text = document.getElementById('entryText').value.trim();
+  if (!text) { showToast('⚠️ Write something first!'); return; }
+
+  const entries = getEntries();
+  entries[todayStr()] = text;
+  saveEntries(entries);
+  refreshHome();
+  showToast('✅ Entry saved!');
+}
+
+// ── Delete Entry ──────────────────────────────────────────
+function deleteEntry(dateStr) {
+  if (!confirm(`Delete entry for ${formatShort(dateStr)}?`)) return;
+  const entries = getEntries();
+  delete entries[dateStr];
+  saveEntries(entries);
+  if (dateStr === todayStr()) document.getElementById('entryText').value = '';
+  refreshHome();
+  renderHistory();
+  renderWeekly();
+  showToast('🗑️ Entry deleted');
+}
+
+// ── Escape HTML ───────────────────────────────────────────
+function esc(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Streak ────────────────────────────────────────────────
+function calcStreak() {
+  const entries  = getEntries();
+  const settings = getSettings();
+  const wd       = settings.workDays || 'mon-fri';
+  let streak     = 0;
+  let d          = todayStr();
+
+  // Walk backwards through workdays
+  for (let i = 0; i < 365; i++) {
+    if (!isWorkday(d, wd)) {
+      d = addDays(d, -1);
+      continue;
+    }
+    if (entries[d]) {
+      streak++;
+      d = addDays(d, -1);
+    } else if (d === todayStr()) {
+      // today not yet logged — start checking from yesterday
+      d = addDays(d, -1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+// ── Progress Calculations ─────────────────────────────────
+function calcProgress() {
+  const settings = getSettings();
+  if (!settings.startDate) return null;
+
+  const start    = settings.startDate;
+  const weeks    = parseInt(settings.durationWeeks) || 24;
+  const wd       = settings.workDays || 'mon-fri';
+  const entries  = getEntries();
+  const today    = todayStr();
+
+  // Expected end date
+  let endDate = addDays(start, weeks * 7);
+
+  // Count total expected workdays from start to today (or end)
+  const bound = today < endDate ? today : endDate;
+  let totalWorkDays    = 0;
+  let elapsedWorkDays  = 0;
+  let loggedDays       = 0;
+  let missedDays       = 0;
+
+  // Total expected workdays in programme
+  let cursor = start;
+  while (cursor <= endDate) {
+    if (isWorkday(cursor, wd)) totalWorkDays++;
+    cursor = addDays(cursor, 1);
+  }
+
+  // Up to today
+  cursor = start;
+  while (cursor <= bound) {
+    if (isWorkday(cursor, wd)) {
+      elapsedWorkDays++;
+      if (entries[cursor]) loggedDays++;
+      else if (cursor < today) missedDays++;
+    }
+    cursor = addDays(cursor, 1);
+  }
+
+  const weeksElapsed = Math.max(0, diffDays(start, today) / 7);
+  const weeksLeft    = Math.max(0, weeks - weeksElapsed);
+  const pct          = Math.min(100, Math.round((weeksElapsed / weeks) * 100));
+
+  // Completion status
+  let status = 'on-track';
+  const logRate = elapsedWorkDays > 0 ? loggedDays / elapsedWorkDays : 1;
+  if (logRate < 0.5)       status = 'behind';
+  else if (logRate < 0.75) status = 'at-risk';
+
+  const isComplete = today >= endDate;
+  if (isComplete) status = 'completed';
+
+  return {
+    start, endDate, weeks, wd,
+    totalWorkDays, elapsedWorkDays,
+    loggedDays, missedDays,
+    weeksElapsed: Math.floor(weeksElapsed),
+    weeksLeft:    Math.ceil(weeksLeft),
+    pct, status, isComplete, logRate,
+    today
+  };
+}
+
+// ── Home Refresh ──────────────────────────────────────────
+function refreshHome() {
+  const today    = todayStr();
+  const entries  = getEntries();
+  const settings = getSettings();
+  const streak   = calcStreak();
+  const progress = calcProgress();
+
+  // Date label
+  document.getElementById('todayDateLabel').textContent = formatFull(today);
+
+  // Load today's entry
+  const ta = document.getElementById('entryText');
+  if (!ta.value && entries[today]) {
+    ta.value = entries[today];
+    document.getElementById('charCount').textContent = ta.value.length;
+  }
+
+  // Header sub
+  document.getElementById('headerSub').textContent =
+    settings.name ? `Welcome, ${settings.name.split(' ')[0]}!` : 'Daily Work Diary';
+
+  // Streak
+  const sc = document.getElementById('streakCount');
+  if (streak === 0)      sc.textContent = 'No streak yet';
+  else if (streak === 1) sc.textContent = '1 day streak 🔥';
+  else                   sc.textContent = `${streak} day streak 🔥`;
+
+  // Progress card
+  if (progress) {
+    document.getElementById('progressSub').textContent =
+      `${formatShort(progress.start)} → ${formatShort(progress.endDate)} (${progress.weeks} weeks)`;
+
+    const bar = document.getElementById('mainProgressBar');
+    bar.style.width = progress.pct + '%';
+    bar.className   = 'progress-bar';
+    if (progress.pct < 40)      bar.classList.add('danger');
+    else if (progress.pct < 70) bar.classList.add('warn');
+    else                         bar.classList.add('good');
+
+    document.getElementById('progressLeft').textContent =
+      `Week ${progress.weeksElapsed}`;
+    document.getElementById('progressPercent').textContent =
+      progress.pct + '%';
+
+    // Stats
+    document.getElementById('statDaysLogged').textContent = progress.loggedDays;
+    document.getElementById('statWeeksLeft').textContent  =
+      progress.isComplete ? '✅' : progress.weeksLeft;
+    document.getElementById('statMissed').textContent     = progress.missedDays;
+
+    const endD = parseLocalDate(progress.endDate);
+    document.getElementById('statCompletion').textContent =
+      `${endD.getDate()} ${MONTH_NAMES[endD.getMonth()]}`;
+  } else {
+    // no start date
+    document.getElementById('statDaysLogged').textContent =
+      Object.keys(entries).length;
+    document.getElementById('statWeeksLeft').textContent  = '—';
+    document.getElementById('statMissed').textContent     = '—';
+    document.getElementById('statCompletion').textContent = '—';
+  }
+}
+
+// ── Weekly View ───────────────────────────────────────────
+function changeWeek(delta) {
+  currentWeekOffset += delta;
+  selectedDay = null;
+  renderWeekly();
+}
+
+function renderWeekly() {
+  const settings  = getSettings();
+  const entries   = getEntries();
+  const wd        = settings.workDays || 'mon-fri';
+  const today     = todayStr();
+  const monStr    = weekStart(currentWeekOffset);
+
+  // Week label
+  const sunStr  = addDays(monStr, 6);
+  document.getElementById('weekLabel').textContent =
+    `${formatShort(monStr)} – ${formatShort(sunStr)}`;
+
+  // Build 7 day cells
+  const grid  = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+
+  let weekLogged = 0, weekMissed = 0, weekWorkDays = 0;
+
+  for (let i = 0; i < 7; i++) {
+    const ds     = addDays(monStr, i);
+    const d      = parseLocalDate(ds);
+    const dow    = d.getDay();
+    const isWk   = !isWorkday(ds, wd);   // is weekend
+    const isPast = ds < today;
+    const isToday = ds === today;
+    const logged = !!entries[ds];
+
+    if (!isWk) weekWorkDays++;
+    if (!isWk && logged) weekLogged++;
+    if (!isWk && isPast && !logged) weekMissed++;
+
+    let cls = 'day-cell';
+    if (isWk)          cls += ' weekend';
+    if (logged)        cls += ' logged';
+    else if (isPast && !isWk) cls += ' missed';
+    else if (!isPast && !isToday) cls += ' future';
+    if (isToday)       cls += ' today';
+    if (ds === selectedDay) cls += ' selected';
+
+    const cell = document.createElement('div');
+    cell.className = cls;
+    cell.innerHTML = `
+      <span class="day-name">${DAY_NAMES[dow]}</span>
+      <span class="day-num">${d.getDate()}</span>
+      <span>${logged ? '✅' : (isPast && !isWk ? '❌' : isToday ? '📝' : '')}</span>
+    `;
+    cell.onclick = () => selectDay(ds);
+    grid.appendChild(cell);
+  }
+
+  // Week summary
+  document.getElementById('weekSummary').innerHTML = `
+    <div class="week-stat"><strong>${weekLogged}</strong><span>Logged</span></div>
+    <div class="week-stat"><strong>${weekMissed}</strong><span>Missed</span></div>
+    <div class="week-stat"><strong>${weekWorkDays}</strong><span>Work Days</span></div>
+    <div class="week-stat">
+      <strong>${weekWorkDays > 0
+        ? Math.round((weekLogged / weekWorkDays) * 100) + '%'
+        : '—'
+      }</strong>
+      <span>Rate</span>
+    </div>
+  `;
+
+  // Week entries list
+  const entriesInWeek = [];
+  for (let i = 0; i < 7; i++) {
+    const ds = addDays(monStr, i);
+    if (entries[ds]) entriesInWeek.push(ds);
+  }
+
+  document.getElementById('weekEntriesCount').textContent = entriesInWeek.length;
+
+  const list = document.getElementById('weekEntriesList');
+  if (entriesInWeek.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>No entries this week</p></div>`;
+  } else {
+    list.innerHTML = entriesInWeek.map(ds => `
+      <div class="entry-item">
+        <div class="entry-header">
+          <span class="entry-date-label">${formatShort(ds)}</span>
+          <button class="btn btn-red btn-sm" onclick="deleteEntry('${ds}')">🗑️</button>
+        </div>
+        <div class="entry-text">${esc(entries[ds])}</div>
+      </div>
+    `).join('');
+  }
+
+  // Refresh selected day detail
+  if (selectedDay) selectDay(selectedDay);
+}
+
+function selectDay(ds) {
+  selectedDay = ds;
+  const entries = getEntries();
+  const card    = document.getElementById('dayDetailCard');
+  const title   = document.getElementById('dayDetailTitle');
+  const content = document.getElementById('dayDetailContent');
+  const today   = todayStr();
+
+  title.textContent = formatFull(ds);
+  card.style.display = 'block';
+
+  if (entries[ds]) {
+    content.innerHTML = `
+      <div class="entry-text">${esc(entries[ds])}</div>
+      ${ds === today ? `
+        <div class="divider"></div>
+        <button class="btn btn-ghost btn-sm" onclick="editToday()">✏️ Edit Today's Entry</button>
+      ` : ''}
+    `;
+  } else if (ds > today) {
+    content.innerHTML = `<p style="color:var(--gray-400); font-size:0.85rem;">This day hasn't happened yet.</p>`;
+  } else {
+    content.innerHTML = `
+      <p style="color:var(--red); font-size:0.85rem; margin-bottom:10px;">❌ No entry for this day.</p>
+      ${ds === today ? `<button class="btn btn-primary btn-sm" onclick="navigate('home')">📝 Log Today</button>` : ''}
+    `;
+  }
+
+  renderWeekly(); // re-render to update selection highlight
+}
+
+function editToday() {
+  navigate('home');
+  document.getElementById('entryText').focus();
+}
+
+// ── History ───────────────────────────────────────────────
+function renderHistory() {
+  const entries  = getEntries();
+  const settings = getSettings();
+  const filter   = document.getElementById('historyFilter').value;
+  const sort     = document.getElementById('historySort').value;
+  const wd       = settings.workDays || 'mon-fri';
+  const today    = todayStr();
+  const start    = settings.startDate || null;
+
+  // Build list of relevant dates
+  let dates = [];
+
+  if (filter === 'missed' && start) {
+    // Show all past workdays with no entry
+    let cursor = start;
+    while (cursor < today) {
+      if (isWorkday(cursor, wd) && !entries[cursor]) dates.push(cursor);
+      cursor = addDays(cursor, 1);
+    }
+  } else if (filter === 'logged' || filter === 'all') {
+    dates = Object.keys(entries);
+  } else {
+    dates = Object.keys(entries);
+  }
+
+  if (sort === 'newest') dates.sort().reverse();
+  else                   dates.sort();
+
+  const list = document.getElementById('historyList');
+
+  if (dates.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📭</div>
+        <p>${filter === 'missed' ? 'No missed days! Great job 🎉' : 'No entries yet.'}</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = dates.map(ds => {
+    const logged = !!entries[ds];
+    return `
+      <div class="entry-item ${logged ? '' : 'missed'}">
+        <div class="entry-header">
+          <div>
+            <div class="entry-date-label" style="color:${logged ? 'var(--blue)' : 'var(--red)'}">
+              ${formatFull(ds)}
+            </div>
+            <span class="badge ${logged ? 'badge-green' : 'badge-red'}" style="margin-top:4px; display:inline-block">
+              ${logged ? '✅ Logged' : '❌ Missed'}
+            </span>
+          </div>
+          ${logged ? `<button class="btn btn-red btn-sm" onclick="deleteEntry('${ds}')">🗑️</button>` : ''}
+        </div>
+        ${logged ? `<div class="entry-text">${esc(entries[ds])}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Settings ──────────────────────────────────────────────
+function loadSettingsUI() {
+  const s = getSettings();
+  document.getElementById('startDate').value      = s.startDate     || '';
+  document.getElementById('durationWeeks').value  = s.durationWeeks || 24;
+  document.getElementById('workDays').value        = s.workDays      || 'mon-fri';
+  document.getElementById('reminderTime').value   = s.reminderTime  || '17:00';
+  document.getElementById('profileName').value    = s.name          || '';
+  document.getElementById('profileSchool').value  = s.school        || '';
+  document.getElementById('profileCompany').value = s.company       || '';
+  document.getElementById('profileCourse').value  = s.course        || '';
+
+  if (Notification.permission === 'granted' && s.reminderTime) {
+    document.getElementById('reminderStatus').textContent =
+      `✅ Reminder active at ${s.reminderTime}`;
+  }
+}
+
+function saveSettings() {
+  const s = {
+    startDate:     document.getElementById('startDate').value,
+    durationWeeks: parseInt(document.getElementById('durationWeeks').value) || 24,
+    workDays:      document.getElementById('workDays').value,
+    reminderTime:  document.getElementById('reminderTime').value,
+    name:          document.getElementById('profileName').value,
+    school:        document.getElementById('profileSchool').value,
+    company:       document.getElementById('profileCompany').value,
+    course:        document.getElementById('profileCourse').value,
+  };
+  saveSettingsObj(s);
+  renderCompletionInfo();
+  refreshHome();
+}
+
+function renderCompletionInfo() {
+  const p    = calcProgress();
+  const card = document.getElementById('completionCard');
+  const tl   = document.getElementById('completionTimeline');
+
+  if (!p) {
+    card.style.display = 'none';
+    tl.innerHTML = '';
+    return;
+  }
+
+  card.style.display = 'block';
+
+  // Status card
+  card.className = `completion-card ${p.status}`;
+
+  const statusMap = {
+    'on-track':  { icon: '✅', label: 'On Track' },
+    'at-risk':   { icon: '⚠️', label: 'At Risk' },
+    'behind':    { icon: '🚨', label: 'Behind Schedule' },
+    'completed': { icon: '🎉', label: 'Programme Completed!' },
+  };
+
+  const sm = statusMap[p.status];
+  document.getElementById('completionTitle').textContent = `${sm.icon} ${sm.label}`;
+
+  const endD   = parseLocalDate(p.endDate);
+  const ratePC = Math.round(p.logRate * 100);
+
+  document.getElementById('completionBody').innerHTML = `
+    <strong>Expected end date:</strong> ${formatFull(p.endDate)}<br>
+    <strong>Progress:</strong> Week ${p.weeksElapsed} of ${p.weeks} (${p.pct}%)<br>
+    <strong>Days logged:</strong> ${p.loggedDays} / ${p.elapsedWorkDays} workdays elapsed<br>
+    <strong>Logging rate:</strong> ${ratePC}%<br>
+    <strong>Workdays remaining:</strong> ${p.totalWorkDays - p.loggedDays - p.missedDays}
+    ${p.status !== 'on-track' && p.status !== 'completed'
+      ? `<br><em style="margin-top:6px; display:block">
+          💡 Log consistently to stay on track.
+          You've missed ${p.missedDays} workday(s).
+         </em>`
+      : ''
+    }
+  `;
+
+  // Timeline rows
+  const weeks  = parseInt(p.weeks);
+  const rows   = [];
+
+  // Milestone weeks
+  const milestones = [1, 4, 8, 12, 16, 20, 24].filter(w => w <= weeks);
+  milestones.forEach(w => {
+    const ds   = addDays(p.start, w * 7);
+    const past = ds <= p.today;
+    const curr = p.weeksElapsed === w;
+    rows.push(`
+      <div class="timeline-row">
+        <div class="timeline-dot ${past ? 'dot-green' : curr ? 'dot-blue' : 'dot-gray'}"></div>
+        <div style="flex:1">
+          <strong>Week ${w}</strong>
+          <span style="color:var(--gray-400); font-size:0.8rem; margin-left:8px">${formatShort(ds)}</span>
+        </div>
+        <span class="badge ${past ? 'badge-green' : curr ? 'badge-blue' : ''}">
+          ${past ? 'Passed' : curr ? 'Current' : 'Upcoming'}
+        </span>
+      </div>
+    `);
+  });
+
+  tl.innerHTML = `
+    <div class="section-title" style="margin-top:16px">Programme Milestones</div>
+    ${rows.join('')}
+  `;
+}
+
+// ── Reminders ─────────────────────────────────────────────
+function setReminder() {
+  const time = document.getElementById('reminderTime').value;
+  if (!time) { showToast('Select a time first'); return; }
+
+  if (!('Notification' in window)) {
+    document.getElementById('reminderStatus').textContent =
+      '❌ Browser does not support notifications';
+    return;
+  }
+
+  Notification.requestPermission().then(perm => {
+    if (perm === 'granted') {
+      const s = getSettings();
+      s.reminderTime = time;
+      saveSettingsObj(s);
+      document.getElementById('reminderStatus').textContent =
+        `✅ Reminder active at ${time} daily`;
+      showToast(`⏰ Reminder set for ${time}!`);
+      startReminderInterval(time);
+    } else {
+      document.getElementById('reminderStatus').textContent =
+        '❌ Permission denied. Enable in browser settings.';
+    }
+  });
+}
+
+function startReminderInterval(time) {
+  if (reminderInterval) clearInterval(reminderInterval);
+  const [h, m] = time.split(':').map(Number);
+
+  reminderInterval = setInterval(() => {
+    const now     = new Date();
+    const entries = getEntries();
+    if (
+      now.getHours()   === h &&
+      now.getMinutes() === m &&
+      !entries[todayStr()]
+    ) {
+      new Notification('📓 SIWES Logbook', {
+        body: "Don't forget to fill in your logbook! What did you do today?",
+        badge: 'icons/icon-192.png',
+        icon:  'icons/icon-192.png',
+      });
+    }
+  }, 60_000);
+}
+
+// ── Export ────────────────────────────────────────────────
+function exportLogbook() {
+  const entries  = getEntries();
+  const settings = getSettings();
+  const dates    = Object.keys(entries).sort();
+
+  if (dates.length === 0) {
+    showToast('No entries to export yet!');
+    return;
+  }
+
+  let text = `SIWES LOGBOOK\n${'='.repeat(50)}\n`;
+  text += `Name:        ${settings.name    || 'N/A'}\n`;
+  text += `Institution: ${settings.school  || 'N/A'}\n`;
+  text += `IT Place:    ${settings.company || 'N/A'}\n`;
+  text += `Course:      ${settings.course  || 'N/A'}\n`;
+  text += `Start Date:  ${settings.startDate || 'N/A'}\n`;
+  text += `Duration:    ${settings.durationWeeks} weeks\n`;
+  text += `Exported:    ${new Date().toLocaleString('en-NG')}\n`;
+  text += `${'='.repeat(50)}\n\n`;
+
+  dates.forEach((ds, i) => {
+    text += `Entry ${i + 1} | ${formatFull(ds)}\n`;
+    text += `${'-'.repeat(40)}\n`;
+    text += `${entries[ds]}\n\n`;
+  });
+
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `siwes-logbook-${todayStr()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📄 Logbook exported!');
+}
+
+// ── Clear Data ────────────────────────────────────────────
+function clearAllData() {
+  if (!confirm('Delete ALL entries and settings? This cannot be undone!')) return;
+  if (!confirm('Are you absolutely sure?')) return;
+  localStorage.clear();
+  location.reload();
+}
+
+// ── PWA Install ───────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+  document.getElementById('installBtn').style.display = 'block';
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  const { outcome } = await deferredInstall.userChoice;
+  if (outcome === 'accepted') {
+    document.getElementById('installBtn').style.display = 'none';
+    showToast('🎉 App installed!');
+  }
+  deferredInstall = null;
+});
+
+// ── Service Worker Registration ───────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('SW registered'))
+    .catch(e => console.error('SW error', e));
+}
+
+// ── Init ──────────────────────────────────────────────────
+(function init() {
+  loadSettingsUI();
+  refreshHome();
+
+  // Start reminder if already granted
+  const s = getSettings();
+  if (Notification.permission === 'granted' && s.reminderTime) {
+    startReminderInterval(s.reminderTime);
+  }
+})();
+</script>
+</body>
+</html>
